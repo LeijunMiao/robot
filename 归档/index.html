@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<style>
+  .none {
+    display: none;
+  }
+</style>
+
+<body>
+  <h1 id="title">Loading...</h1>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script type="text/javascript">
+    $(function () {
+      var iosocket = io.connect("ws://114.55.253.187:3000/");// 114.55.253.187
+
+      var id = getQueryString('id') || 'A1';
+      var num = 0, errors = ['错误-码未读出', '错误-物料错误', '错误-批次错误', '错误-超出数量', '错误-超出重量'], open = false, open2 = false, reverse = false, isContinue = false, isQrcode = false;
+      $('#title').html('设备：' + id);
+      iosocket.on("connect", function () {
+        iosocket.emit('userLogin', { plc: id });//UserName: "123q",
+        iosocket.on('userRes', function (data) {
+          console.log(data);
+        });
+        iosocket.on("message", function (msg) {
+          console.log(msg);
+          if (!msg.errcode || msg.errcode == 1005) {
+            // if (msg.msg == 1) {
+            // if (!open) {
+            //   return iosocket.emit('clientBroadcast', { room: 'eventRoom', event: 'msg_res', data: { errcode: 100, errmsg: '错误-未开机' } });
+            // }
+            if (!reverse) num += msg.data.total;
+            else num -= msg.data.total;
+            $('.num1').html(num);
+            // return iosocket.emit('clientBroadcast', { room: 'eventRoom', event: 'msg_res', data: { errcode: 0, errmsg: '成功' } })
+            // } else {
+            //   $('.type').html('停止,' + errors[msg.msg - 2]);
+            //   $('#open').removeClass("none");
+            //   $('#close').addClass("none");
+
+            //   open = false;
+            // }
+          }
+          if (msg.errcode) {
+            $('.type').html('停止,' + msg.errmsg);
+            $('#open1').removeClass("none");
+            $('#close1').addClass("none");
+            open = false;
+          }
+        });
+        iosocket.on("switch_machine", function (msg) {
+          //alert(JSON.stringify(msg));
+          console.log(msg);
+          if (msg.code == 'success') {
+
+            if (msg.msg == 'open') {
+              $('.type').html('运行中');
+              $('#open1').addClass("none");
+              $('#close1').removeClass("none");
+              open = true;
+            }
+            else {
+              $('.type').html('停止');
+              $('#open1').removeClass("none");
+              $('#close1').addClass("none");
+              open = false;
+            }
+          }
+        });
+        iosocket.on("finish_order", function (msg) {
+          console.log(msg);
+        });
+      });
+      $('#open1').click(function () {
+        return directive({
+          plc: id,
+          type: 'open',
+          order: $('#order').val(),//59707df57cc955fd715379dd
+          batch: $('#batch').val(),//59707d510f329f940d57f84a
+          isQrcode: isQrcode,
+          continue: isContinue,
+          reverse: reverse
+        });
+      });
+      $('#close1').click(function () {
+        return directive({
+          plc: id,
+          type: 'close',
+          order: $('#order').val(),
+          batch: $('#batch').val(),
+          isQrcode: true
+        });
+      });
+      $('#finish').click(function () {
+        iosocket.emit('finishOrder', {
+          room: 'eventRoom', event: 'finish_order', data: {
+            plc: id,
+            order: $('#order').val(),
+          }
+        });
+      });
+      $('#reverse').click(function () {
+        reverse = !reverse;
+        if (reverse) $('#reverse').html('反向开');
+        else $('#reverse').html('反向关');
+      });
+      $('#continue').click(function () {
+        isContinue = !isContinue;
+        if (isContinue) $('#continue').html('超出开');
+        else $('#continue').html('超出关');
+      });
+      $('#isQrcode').click(function () {
+        isQrcode = !isQrcode;
+        if (isQrcode) $('#isQrcode').html('是否二维码开');
+        else $('#isQrcode').html('是否二维码关');
+      });
+      function directive(body) {
+        $('.type').html('loading...');
+        iosocket.emit('clientBroadcast', { room: 'eventRoom', event: 'switch_machine', data: body });
+      }
+      function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+      }
+      $('#beyondC').click(function () {
+        iosocket.emit('clientBroadcast', { room: 'eventRoom', event: 'beyond', data: {
+          plc: id,
+          type: 'open',
+          order: $('#order').val(),//59707df57cc955fd715379dd
+          batch: $('#batch').val(),//59707d510f329f940d57f84a
+          isQrcode: isQrcode,
+          continue: isContinue,
+          reverse: reverse,
+          total: 2,
+        } });
+      });
+      $('#beyondS').click(function () {
+        iosocket.emit('clientBroadcast', { room: 'eventRoom', event: 'beyond', data: {
+          plc: id,
+          type: 'close',
+          order: $('#order').val(),//59707df57cc955fd715379dd
+          batch: $('#batch').val(),//59707d510f329f940d57f84a
+          isQrcode: isQrcode,
+          continue: isContinue,
+          reverse: reverse,
+          total: 2,
+        } });
+      });
+
+    });
+  </script>
+  <h3> 机器状态：<span class="type">停止</span></h3>
+  <div id="conent"></div>
+  <h3>订单： <input type="text" id="order"> 批次：<input type="text" id="batch"> 数量:<span class="num1">0</span></h3>
+  <h3>
+    <button type="button" id="open1">开始</button>
+    <!-- <button type="button" id="open3">继续</button> -->
+    <button type="button" id="close1" class="none">停止</button>
+  </h3>
+  <button type="button" id="continue">超出关</button>
+  <button type="button" id="reverse">反向关</button>
+  <button type="button" id="isQrcode">是否二维码关</button>
+
+  <button type="button" id="beyondC">超出继续</button>
+  <button type="button" id="beyondS">超出暂停</button>
+  <!-- <h3>批次：124,计数:<span class="num2">0</span></h3>
+  <button type="button" id="open2">开始</button>
+  <button type="button" id="close2" class="none">停止</button> -->
+  <br>
+  <h3> <button type="button" id="finish" class="">完成</button></h3>
+
+</body>
+
+</html>

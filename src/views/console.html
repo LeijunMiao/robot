@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<title>控制台</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+
+<!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+<!-- <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+<link href="../lib/toastr/toastr.css" rel="stylesheet" />
+<script src="../lib/toastr/toastr.js"></script>
+
+<body style="padding: 20px">
+    <h1>
+        <span class="consoleId"></span>控制台
+        <small class="small"></small>
+    </h1>
+    <p>
+        <kbd>B1 1 1 2</kbd> (机器编码 指令类型(1:移动指令) 到达的定位点编号 速度移动)
+        <br>
+        <kbd>B1 2 1 1</kbd> (机器编码 指令类型(2:操作指令) 操作对象 操作的值)
+        <br>
+        <kbd>clear</kbd> 清理日志
+    </p>
+    <input type="text" class="form-control directive">
+    <ul>
+    </ul>
+</body>
+
+<script type="text/javascript">
+    window.service = '{= service =}' || 'ws://localhost:3001/';
+    $(function () {
+
+        //获取url参数
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+
+        //var service = 'ws://114.55.253.187:3001/';
+        var iosocket = io.connect(service); // 114.55.253.187
+        var vm = {
+            id: getQueryString('id') || 'A1',
+            io: {
+                init: function () {
+                    iosocket.on("connect", function () {
+                        iosocket.emit('userLogin', {
+                            console: vm.id
+                        });
+                        iosocket.on('userRes', function (data) {
+                            if (!data.errcode) {
+                                toastr.info(' 登录成功！')
+                                vm.operation.addMsg('登录成功！');
+                                $('title').html(data.console + '控制台');
+                            }
+                        });
+                        iosocket.on('broadcast', function (data) {
+                            vm.operation.addMsg(data);
+                        });
+                        iosocket.on('pulse', function (data) {
+                            vm.operation.addMsg('脉搏:' + JSON.stringify(data));
+                        });
+                        iosocket.on('readSensor', function (data) {
+                            vm.operation.addMsg('空气指数:' + JSON.stringify(data));
+                        });
+                        
+                    });
+                }
+            },
+            render: function () {
+                $('.directive').bind('keypress', function (event) {
+                    if (event.keyCode == 13) {
+                        var list = this.value.split(' ');
+                        if(list.length == 1 && list[0] == 'clear'){
+                            vm.operation.clear();
+                            return;
+                        }
+                        if (list.length < 4) return;
+                        var data = {
+                            machineId: list[0],
+                            type: 'control>plc',
+                            actionType: parseInt(list[1]),
+                        }
+                        if (data.actionType == 1) {
+                            data.to = parseInt(list[2]);
+                            data.speed = parseInt(list[3]);
+                        } else if (data.actionType == 2) {
+                            data.object = parseInt(list[2]);
+                            data.action = parseInt(list[3]);
+                        }
+                        vm.operation.addMsg('emit "action" ' + JSON.stringify(data));
+                        iosocket.emit('action', data);
+                        this.value = '';
+                    }
+                });
+                $('.consoleId').html(vm.id);
+                $('.small').html('服务器地址：' + service);
+            },
+            operation: {
+                addMsg: function (msg) {
+                    $('ul').prepend('<li>' + msg + '</li>');
+                },
+                clear: function () {
+                    $('ul').html('');
+                }
+            },
+            init: function () {
+                this.io.init();
+                this.render();
+            }
+        };
+        vm.init();
+    })
+</script>
+
+</html>

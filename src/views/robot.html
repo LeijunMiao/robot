@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<title>机器人端</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+
+<!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+<!-- <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+<link href="../lib/toastr/toastr.css" rel="stylesheet" />
+<script src="../lib/toastr/toastr.js"></script>
+
+<body style="padding: 20px">
+    <h1>
+        <span class="machineId"></span>机器人
+        <small class="small"></small>
+
+    </h1>
+    <p>
+        上线指令：
+        <kbd>plcLogin B1 1 0 0</kbd> (指令类型 机器编码 状态 定位 坐标)
+        <br> 脉搏指令：
+        <kbd>pulse B1 1 2>3 9</kbd>
+    </p>
+    <input type="text" class="form-control directive">
+    <ul>
+    </ul>
+</body>
+
+<script type="text/javascript">
+    window.service = '{= service =}' || 'ws://localhost:3001/';
+    $(function () {
+
+        //获取url参数
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+
+        // var service = 'ws://114.55.253.187:3001/';
+        var iosocket = io.connect(service); // 114.55.253.187
+        var vm = {
+            // id: getQueryString('id') || 'B1',
+            io: {
+                init: function () {
+                    iosocket.on("connect", function () {
+                        iosocket.on('userRes', function (data) {
+                            vm.operation.addMsg('on "userRes" ' + JSON.stringify(data));
+                            if (!data.errcode) {
+                                toastr.info(' 登录成功！')
+                                $('.machineId').html(data.machineId);
+                                $('title').html(data.machineId + '机器人');
+                            }
+                        });
+                        iosocket.on('action', function (data) {
+                            vm.operation.addMsg('on "action" ' + JSON.stringify(data));
+                        });
+                        iosocket.on('broadcast', function (data) {
+                            vm.operation.addMsg(data);
+                        });
+                    });
+                }
+            },
+            render: function () {
+                $('.directive').bind('keypress', function (event) {
+                    if (event.keyCode == 13) {
+                        var list = this.value.trim().split(' ');
+                        switch (list[0]) {
+                            case 'plcLogin':
+                                if (list.length < 5) break;
+                                var data = {
+                                    machineId: list[1],
+                                    type: 'plc>control',
+                                    status: parseInt(list[2]),
+                                    path: list[3],
+                                    position: parseInt(list[4]),
+                                }
+                                vm.operation.addMsg('emit "' + list[0] + '" ' + JSON.stringify(
+                                    data));
+                                iosocket.emit(list[0], data);
+                                break;
+
+                            case 'pulse':
+                                if (list.length < 5) break;
+                                var data = {
+                                    machineId: list[1],
+                                    type: 'plc>control',
+                                    status: parseInt(list[2]),
+                                    path: list[3],
+                                    position: parseInt(list[4]),
+                                }
+                                vm.operation.addMsg('emit "' + list[0] + '" ' + JSON.stringify(
+                                    data));
+                                iosocket.emit(list[0], data);
+                                break;
+                        }
+                        this.value = '';
+                    }
+                });
+                $('.small').html('服务器地址：' + service);
+            },
+            operation: {
+                addMsg: function (msg) {
+                    $('ul').prepend('<li>' + msg + '</li>');
+                }
+            },
+            init: function () {
+                this.io.init();
+                this.render();
+            }
+        };
+        vm.init();
+    })
+</script>
+
+</html>

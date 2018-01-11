@@ -1,0 +1,13 @@
+{
+  "name": "socket-robot",
+  "version": "0.0.1",
+  "description": "robot socket.io app",
+  "dependencies": {
+    "consolidate": "^0.15.0",
+    "debug": "^2.6.8",
+    "express": "~3.4.4",
+    "socket.io": "~2.0.3",
+    "socket.io-wildcard": "^0.1.1",
+    "swig": "^1.4.2"
+  }
+}
