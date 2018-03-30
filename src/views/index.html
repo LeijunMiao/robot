@@ -1,0 +1,343 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>index</title>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<link rel="stylesheet" href="css/reset.css" />
+	<link rel="stylesheet" href="css/style.css" />
+	<script src="js/jquery-1.10.1.min.js"></script>
+</head>
+
+<body>
+
+	<div class="clearfix index-wrap">
+		<div class="index-left">
+			<div class="left-item left-bg1">
+				<div class="item-hd">
+					环境噪音
+					<span class="fr">123
+						<sup> ug/m3</sup>
+					</span>
+				</div>
+				<div class="item-bd">
+					<img src="images/icon_charts.png" alt="" class="imgm">
+				</div>
+			</div>
+			<div class="left-item left-bg2">
+				<div class="item-hd">
+					湿度
+					<!-- <span class="fr">49<sup>％</sup>～51<sup>％</sup></span> -->
+					<span class="fr humidity" ></span>
+				</div>
+				<!-- <div class="item-bd">
+				<img src="images/icon_charts.png" alt="" class="imgm">
+			</div> -->
+			</div>
+			<div class="left-item left-bg3">
+				<div class="item-hd">
+					温度
+					<!-- <span class="fr">20<sup> c</sup></span> -->
+					<span class="fr temperature" >0
+					</span>
+				</div>
+				<div class="item-circle">
+						<span  class="temperature" style="font-size: 17px;">0
+							</span>
+					<!-- <span>22
+						<sup>°</sup>
+					</span> -->
+					<p>摄氏度</p>
+				</div>
+				<!-- <div class="item-bd">
+				<img src="images/icon_charts.png" alt="" class="imgm">
+			</div> -->
+			</div>
+			<script src="js/circleProgress.js"></script>
+			<script src="/socket.io/socket.io.js"></script>
+			<script>
+				window.service = '{= service =}' || 'ws://localhost:3001/';
+				$(function () {
+					$('.item-circle').circleProgress({
+						size: 180,
+						animation: false,
+						startAngle: 1.58 * Math.PI,
+						thickness: 22,
+						value: 0.2,
+						lineCap: 'round',
+						emptyFill: '#144059',
+						fill: {
+							color: '#1694e3', // fallback color when image is not loaded
+							image: 'images/icon_circle.png'
+						},
+					});
+					// $('.item-circle').circleProgress('value', 0.75);
+					console.log(service);
+					var iosocket = io.connect(service); // 114.55.253.187
+					iosocket.on("connect", function () {
+						iosocket.emit('userLogin', {
+							console: 'A10'
+						});
+						iosocket.on('userRes', function (data) {
+							if (!data.errcode) {
+								// toastr.info(' 登录成功！')
+								// vm.operation.addMsg('登录成功！');
+								// $('title').html(data.console + '控制台');
+							}
+						});
+						// iosocket.on('broadcast', function (data) {
+						// 	vm.operation.addMsg(data);
+						// });
+						// iosocket.on('pulse', function (data) {
+						// 	vm.operation.addMsg('脉搏:' + JSON.stringify(data));
+						// });
+						var t;
+						iosocket.on('readSensor', function (data) {
+							// vm.operation.addMsg('空气指数:' + JSON.stringify(data));
+							console.log(data);
+							$('.humidity').html(data.HUMI);
+							$('.temperature').html(data.TEMP);
+							$('.pm25').html(data.PM25);
+							$('.temperature').html(data.PM10);
+							$('.temperature').html(data.TEMP);
+							t = data.TEMP.replace(/[^\d.]/g,'');
+							$('.item-circle').circleProgress({ value: t/40});
+						});
+
+					});
+					iosocket.emit('air');
+					setInterval(function () {
+						iosocket.emit('air');
+					}, 5000)
+
+					
+				});
+			</script>
+		</div>
+		<!-- left end -->
+		<div class="clearfix index-middle">
+			<div class="index-middle-left">
+				<div class="item-hd">
+					<img src="images/index-middle-left_icon.png" alt="" class="imgm">
+				</div>
+				<ul class="clearfix item-bd">
+					<li>
+						<span class="pm25">
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>pm2.5细颗粒物</p>
+					</li>
+					<li>
+						<span >
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>O2氧气浓度</p>
+					</li>
+					<li>
+						<span>
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>co一氧化碳浓度</p>
+					</li>
+					<li>
+						<span>
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>H2S 硫化氢浓度</p>
+					</li>
+					<li>
+						<span class="pm10">
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>pm10可吸入颗粒物</p>
+					</li>
+					<li>
+						<span class="co2">
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>co2二氧化碳浓度</p>
+					</li>
+					<li>
+						<span class="hcho">
+							<b>0</b>
+							<sup>ug/m3</sup>
+						</span>
+						<p>CH4甲烷浓度</p>
+					</li>
+				</ul>
+			</div>
+			<!-- index-middle-left end -->
+			<div class="index-middle-center">
+				<div class="index-center">
+					<div class="item-bg">
+						<span class="bg-1"></span>
+						<span class="bg-2"></span>
+					</div>
+					<div class="item-hd">
+						<p class="txt-1">pm2.5</p>
+						<p class="txt-2">o2</p>
+						<p class="txt-3">co</p>
+						<p class="txt-4">h2s</p>
+						<p class="txt-5">pm10</p>
+						<p class="txt-6">ch4</p>
+						<p class="txt-7">CO2</p>
+					</div>
+				</div>
+				<div class="index-state">
+					<div class="item-hd">离线</div>
+					<ul class="item-bd">
+						<li class="on">电源状态</li>
+						<li class="on">系统状态</li>
+						<li class="on">动力状态</li>
+						<li>通讯状态</li>
+						<li style="width: 200px;">照明灯状态</li>
+						<li>超声波状态</li>
+						<li class="switch">开
+							<i></i>关</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!-- index-middle end -->
+		<div class="index-right">
+			<div class="index-progress">
+				<div class="item-hd">
+					<span class="robot" style="left: 33.3333%;"></span>
+				</div>
+				<div class="item-unit">
+					<span class="m-0">0m</span>
+					<span class="m-1">1m</span>
+					<span class="m-2">2m</span>
+					<span class="m-3">3m</span>
+				</div>
+				<div class="item-bd">机器人位置
+					<i>单位：米</i>
+				</div>
+			</div>
+			<!--  -->
+			<div class="index-video">
+				<div class="item-bd">
+					<a href="javascript:;" class="play"></a>
+					<video class="video" id="myPlayer" poster="" controls playsInline webkit-playsinline autoplay>
+						<source src="rtmp://rtmp.open.ys7.com/openlive/17e1be36fb28460dace3ad4754e7c1f4.hd" type="rtmp/flv" />
+						<source src="http://hls.open.ys7.com/openlive/17e1be36fb28460dace3ad4754e7c1f4.hd.m3u8" type="application/x-mpegURL" />
+					</video>
+					<script src="https://open.ys7.com/sdk/js/1.1/ezuikit.js"></script>
+					<script type="text/javascript">
+						var player = new EZUIPlayer('myPlayer');
+						$(document).on('click', '.play', function (event) {
+							player.play();
+						});
+						player.on('play', function () {
+							$('.play').hide();
+						});
+						player.on('pause', function () {
+							$('.play').show();
+						});
+					</script>
+				</div>
+			</div>
+			<!--  -->
+			<div class="index-tab">
+				<ul class="index-menu">
+					<li class="on">
+						<a href="javascript:;" class="menu-1">表计</a>
+					</li>
+					<li>
+						<a href="javascript:;" class="menu-2">局放</a>
+					</li>
+					<li>
+						<a href="javascript:;" class="menu-3">温升</a>
+					</li>
+					<li>
+						<a href="javascript:;" class="menu-4">理化</a>
+					</li>
+				</ul>
+				<div class="index-tab-main">
+					<ul class="clearfix" style="display: block;">
+						<li>
+							<span>开关状态指示器</span>
+							<p class="on">合闸</p>
+							<p class="on">正常</p>
+							<p class="on">已检</p>
+						</li>
+						<li>
+							<span>储能状态电器指示</span>
+							<p class="on">已储能</p>
+							<p class="red">异常</p>
+							<p class="blue">待检</p>
+						</li>
+						<li>
+							<span>接地指示</span>
+							<p class="on">合闸</p>
+							<p class="red">异常</p>
+							<p class="on">已检</p>
+						</li>
+						<li>
+							<span>开关位置机械指示</span>
+							<p class="red">异常</p>
+							<p class="on">已检</p>
+						</li>
+					</ul>
+					<ul class="clearfix">
+						<li>
+							<span>接地指示</span>
+							<p class="on">合闸</p>
+							<p class="red">异常</p>
+							<p class="on">已检</p>
+						</li>
+						<li>
+							<span>开关位置机械指示</span>
+							<p class="red">异常</p>
+							<p class="on">已检</p>
+						</li>
+					</ul>
+					<ul class="clearfix">
+						<li>
+							<span>储能状态电器指示</span>
+							<p class="on">已储能</p>
+							<p class="red">异常</p>
+							<p class="blue">待检</p>
+						</li>
+						<li>
+							<span>接地指示</span>
+							<p class="on">合闸</p>
+							<p class="red">异常</p>
+							<p class="on">已检</p>
+						</li>
+					</ul>
+					<ul class="clearfix">
+						<li>
+							<span>开关状态指示器</span>
+							<p class="on">合闸</p>
+							<p class="on">正常</p>
+							<p class="on">已检</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<script>
+				$(function () {
+					$(document).on('click', '.index-menu a', function (event) {
+						event.preventDefault();
+						var index = $(this).parents('li').index();
+						$(this).parents('li').addClass('on').siblings().removeClass('on');
+						$('.index-tab-main ul').eq(index).show().siblings().hide();
+					});
+				});
+			</script>
+		</div>
+		<!-- index-right end -->
+	</div>
+
+</body>
+
+</html>

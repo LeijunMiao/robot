@@ -1,6 +1,7 @@
 global.env = process.env.NODE_ENV || 'development';
 
 global.config = require('./config/config');
+require('./connect');
 var port = config.port || 3001;
 
 var debug = {
@@ -70,13 +71,18 @@ require('./io')(app,server);
 
 app.get('/', function (req, res) {
     store.incr('console.visits');
-    res.render('console',{server: config.server});;
+    res.render('console',{server: config.server});
 });
 
 app.get('/plc', function (req, res) {
     store.incr('robot.visits');
-    res.render('robot',{server: config.server});;
+    res.render('robot',{server: config.server});
     // res.sendfile(__dirname + '/src/robot.html',{env: app.get('env')});
+});
+
+app.get('/show', function (req, res) {
+    res.render('index',{server: config.server});
+    // res.sendfile(__dirname + '/src/views/index.html',{server: config.server});
 });
 
 app.use(express.static(__dirname + '/src'));

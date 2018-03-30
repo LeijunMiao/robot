@@ -63,14 +63,27 @@ module.exports = function (app, server) {
             }
 
         });
+        socket.on('air', function (data) {
+            if(Object.keys(coms).length === 0) {
+                for (var key in consoles) {
+                    consoles[key].Socket.emit('broadcast', '空气大师离线'); 
+                }
+                return;
+            }
+            for (var com in coms) {
+                coms[com].Socket.emit('comData'); 
+            }
+        });
 
         //接收控制台指令
         socket.on('action', function (data) {
             //todo 保存到数据库
             if (plcs[data.machineId]) plcs[data.machineId].Socket.emit('action', data); //给PLC发送指令
         });
+        var recode = require('./app/controllers/record');
         socket.on('readSensor', function (data) {
             //todo 保存到数据库
+            if(data)recode.add(data);
             for (var key in consoles) {
                 consoles[key].Socket.emit('readSensor', data); //给控制台发送脉搏
             }

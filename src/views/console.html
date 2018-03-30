@@ -15,6 +15,7 @@
     crossorigin="anonymous"></script>
 <link href="../lib/toastr/toastr.css" rel="stylesheet" />
 <script src="../lib/toastr/toastr.js"></script>
+<script src="https://open.ys7.com/sdk/js/1.1/ezuikit.js"></script>
 
 <body style="padding: 20px">
     <h1>
@@ -27,7 +28,16 @@
         <kbd>B1 2 1 1</kbd> (机器编码 指令类型(2:操作指令) 操作对象 操作的值)
         <br>
         <kbd>clear</kbd> 清理日志
+        <br>
+        <kbd>air</kbd> 获取空气质量数据
     </p>
+    <div style="position: absolute;right: 0;top: 0;">
+        <video id="myPlayer" poster="" controls playsInline webkit-playsinline autoplay>
+            <source src="rtmp://rtmp.open.ys7.com/openlive/17e1be36fb28460dace3ad4754e7c1f4.hd" type="rtmp/flv" />
+            <source src="http://hls.open.ys7.com/openlive/17e1be36fb28460dace3ad4754e7c1f4.hd.m3u8" type="application/x-mpegURL" />
+
+        </video>
+    </div>
     <input type="text" class="form-control directive">
     <ul>
     </ul>
@@ -36,7 +46,7 @@
 <script type="text/javascript">
     window.service = '{= service =}' || 'ws://localhost:3001/';
     $(function () {
-
+        var player = new EZUIPlayer('myPlayer');
         //获取url参数
         function getQueryString(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
@@ -71,7 +81,7 @@
                         iosocket.on('readSensor', function (data) {
                             vm.operation.addMsg('空气指数:' + JSON.stringify(data));
                         });
-                        
+
                     });
                 }
             },
@@ -79,11 +89,25 @@
                 $('.directive').bind('keypress', function (event) {
                     if (event.keyCode == 13) {
                         var list = this.value.split(' ');
-                        if(list.length == 1 && list[0] == 'clear'){
-                            vm.operation.clear();
-                            return;
+                        if (list.length == 1) {
+                            this.value = '';
+                            if (list[0] == 'clear') {
+                                vm.operation.clear();
+                                return;
+                            } else if (list[0] == 'air') {
+                                iosocket.emit('air');
+                                return;
+                            }
                         }
-                        if (list.length < 4) return;
+                        if (list.length < 4) {
+                            if (list.length == 2) {
+                                iosocket.emit('action', {
+                                    machineId: list[0],
+                                    actionType: 3,
+                                    to: parseInt(list[1])
+                                });
+                            } else return
+                        };
                         var data = {
                             machineId: list[0],
                             type: 'control>plc',
