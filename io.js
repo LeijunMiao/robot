@@ -80,10 +80,10 @@ module.exports = function (app, server) {
             //todo 保存到数据库
             if (plcs[data.machineId]) plcs[data.machineId].Socket.emit('action', data); //给PLC发送指令
         });
-        var recode = require('./app/controllers/record');
+        // var recode = require('./app/controllers/record');
         socket.on('readSensor', function (data) {
             //todo 保存到数据库
-            if(data)recode.add(data);
+            // if(data)recode.add(data);
             for (var key in consoles) {
                 consoles[key].Socket.emit('readSensor', data); //给控制台发送脉搏
             }
