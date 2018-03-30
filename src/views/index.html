@@ -100,8 +100,9 @@
 							$('.humidity').html(data.HUMI);
 							$('.temperature').html(data.TEMP);
 							$('.pm25').html(data.PM25);
-							$('.temperature').html(data.PM10);
-							$('.temperature').html(data.TEMP);
+							$('.pm10').html(data.PM10);
+							$('.hcho').html(data.HCHO);
+							$('.co2').html(data.CO2);
 							t = data.TEMP.replace(/[^\d.]/g,'');
 							$('.item-circle').circleProgress({ value: t/40});
 						});
