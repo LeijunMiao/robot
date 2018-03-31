@@ -100,7 +100,7 @@
 										}
 									});
 									iosocket.on('pulse', function (data) {
-										vm.timestamp = new Date().getTime();
+										if(data.status == 1)vm.timestamp = new Date().getTime();
 										if (vm.position != data.position) {
 											switch (data.position) {
 												case 0:
@@ -183,13 +183,15 @@
 						stopAnimation: function () {
 							$('.bg-1').css('animation', 'initial');
 							$('.bg-2').css('animation', 'initial');
+							$('.offline').html('离线');
+							
 							// $('.index-center:before').css('display', 'none');
 							// $('.index-center').prepend("<style>.index-center::before{display:none}</style>");
 						},
 						runAnimation: function () {
 							$('.bg-1').css('animation', 'circle 5s infinite linear alternate');
 							$('.bg-2').css('animation', 'circle 3s infinite linear alternate');
-							
+							$('.offline').html('在线');
 							// $('.index-center:before').css('display', 'block');
 						},
 						init: function () {
@@ -300,7 +302,7 @@
 					</div>
 				</div>
 				<div class="index-state">
-					<div class="item-hd" class="">离线</div>
+					<div class="item-hd" class="offline">在线</div>
 					<ul class="item-bd">
 						<li class="on">电源状态</li>
 						<li class="on">系统状态</li>
