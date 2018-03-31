@@ -175,16 +175,20 @@
 								iosocket.emit('air');
 								setInterval(function () {
 									iosocket.emit('air');
-								}, 5000)
+								}, 1000)
 							}
 						},
 						stopAnimation: function () {
 							$('.bg-1').css('animation', 'initial');
 							$('.bg-2').css('animation', 'initial');
+							// $('.index-center:before').css('display', 'none');
+							// $('.index-center').prepend("<style>.index-center::before{display:none}</style>");
 						},
 						runAnimation: function () {
 							$('.bg-1').css('animation', 'circle 5s infinite linear alternate');
-							$('.bg-2').css('animation', 'circle 5s infinite linear alternate');
+							$('.bg-2').css('animation', 'circle 3s infinite linear alternate');
+							
+							// $('.index-center:before').css('display', 'block');
 						},
 						init: function () {
 							this.io.init();
@@ -192,8 +196,10 @@
 								vm.isRun = !vm.isRun;
 								if (vm.isRun) {
 									$('.robot-button').css('background-image', 'url(../images/stop.png)');
+									
 								} else {
 									$('.robot-button').css('background-image', 'url(../images/run.png)');
+									
 								}
 							});
 							setInterval(function () {
@@ -225,24 +231,24 @@
 					</li>
 					<li>
 						<span>
-							<c>0 ug/m3</c>
+							<c>0 ppm</c>
 							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>O2氧气浓度</p>
+						<p>O2氧气</p>
 					</li>
 					<li>
 						<span>
-							<c>0 ug/m3</c>
+							<c>0 ppm</c>
 							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>CO一氧化碳浓度</p>
+						<p>CO一氧化碳</p>
 					</li>
 					<li>
 						<span>
-							<c>0 ug/m3</c>
+							<c>0 ppm</c>
 							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>H2S 硫化氢浓度</p>
+						<p>H2S 硫化氢</p>
 					</li>
 					<li>
 						<span class="pm10">
@@ -252,18 +258,18 @@
 						<p>pm10可吸入颗粒</p>
 					</li>
 					<li>
-						<span class="CO2">
-							<c>0 ug/m3</c>
+						<span class="co2">
+							<c>0 ppm</c>
 							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>CO2二氧化碳浓度</p>
+						<p>CO2二氧化碳</p>
 					</li>
 					<li>
 						<span class="hcho">
-							<c>0 ug/m3</c>
+							<c>0 mg/m3</c>
 							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>CH4甲烷浓度</p>
+						<p>HCHO甲醛</p>
 					</li>
 				</ul>
 			</div>
@@ -285,12 +291,12 @@
 					</div>
 				</div>
 				<div class="index-state">
-					<div class="item-hd">离线</div>
+					<div class="item-hd" class="">离线</div>
 					<ul class="item-bd">
 						<li class="on">电源状态</li>
 						<li class="on">系统状态</li>
 						<li class="on">动力状态</li>
-						<li>通讯状态</li>
+						<li class="on">通讯状态</li>
 						<li style="width: 200px;">照明灯状态</li>
 						<li>超声波状态</li>
 						<li class="switch">开
