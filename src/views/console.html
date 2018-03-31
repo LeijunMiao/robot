@@ -23,9 +23,11 @@
         <small class="small"></small>
     </h1>
     <p>
-        <kbd>B1 1 1 2</kbd> (机器编码 指令类型(1:移动指令) 到达的定位点编号 速度移动)
+        <kbd>B1 1 1 1200</kbd> (机器编码 指令类型(1:移动指令) 到达的定位点编号 速度移动)
         <br>
         <kbd>B1 2 1 1</kbd> (机器编码 指令类型(2:操作指令) 操作对象 操作的值)
+        <br>
+        <kbd>B1 0</kbd> (机器编码 位置)
         <br>
         <kbd>clear</kbd> 清理日志
         <br>
@@ -106,6 +108,7 @@
                                     actionType: 3,
                                     to: parseInt(list[1])
                                 });
+                                return
                             } else return
                         };
                         var data = {

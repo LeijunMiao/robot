@@ -30,7 +30,15 @@
 				<div class="item-hd">
 					湿度
 					<!-- <span class="fr">49<sup>％</sup>～51<sup>％</sup></span> -->
-					<span class="fr humidity" ></span>
+					<!-- <span class="fr humidity"></span> -->
+				</div>
+				<div class="item-humidity">
+					<span class="humidity" style="font-size: 17px;">0
+					</span>
+					<!-- <span>22
+							<sup>°</sup>
+						</span> -->
+					<p>RH</p>
 				</div>
 				<!-- <div class="item-bd">
 				<img src="images/icon_charts.png" alt="" class="imgm">
@@ -40,12 +48,12 @@
 				<div class="item-hd">
 					温度
 					<!-- <span class="fr">20<sup> c</sup></span> -->
-					<span class="fr temperature" >0
-					</span>
+					<!-- <span class="fr temperature">0
+					</span> -->
 				</div>
 				<div class="item-circle">
-						<span  class="temperature" style="font-size: 17px;">0
-							</span>
+					<span class="temperature" style="font-size: 17px;">0
+					</span>
 					<!-- <span>22
 						<sup>°</sup>
 					</span> -->
@@ -65,7 +73,7 @@
 						animation: false,
 						startAngle: 1.58 * Math.PI,
 						thickness: 22,
-						value: 0.2,
+						value: 0,
 						lineCap: 'round',
 						emptyFill: '#144059',
 						fill: {
@@ -73,47 +81,126 @@
 							image: 'images/icon_circle.png'
 						},
 					});
-					// $('.item-circle').circleProgress('value', 0.75);
-					console.log(service);
 					var iosocket = io.connect(service); // 114.55.253.187
-					iosocket.on("connect", function () {
-						iosocket.emit('userLogin', {
-							console: 'A10'
-						});
-						iosocket.on('userRes', function (data) {
-							if (!data.errcode) {
-								// toastr.info(' 登录成功！')
-								// vm.operation.addMsg('登录成功！');
-								// $('title').html(data.console + '控制台');
+					var vm = {
+						direction: false,
+						position: -1,
+						id: 'A10',
+						isRun: false,
+						timestamp: 0,
+						interval,
+						run: function () {
+							this.isRun = !this.isRun;
+						},
+						io: {
+							init: function () {
+								iosocket.on("connect", function () {
+									iosocket.emit('userLogin', {
+										console: vm.id
+									});
+									iosocket.on('userRes', function (data) {
+										if (data.errcode) {
+											console.log(data.errcode);
+										}
+									});
+									iosocket.on('pulse', function (data) {
+										vm.timestamp = new Date().getTime();
+										if (vm.position != data.position) {
+											switch (data.position) {
+												case 0:
+													$('.robot').css('left', 0);
+													vm.direction = false;
+													if (vm.isRun) {
+
+														iosocket.emit('action', {
+															machineId: 'B1',
+															type: 'control>plc',
+															actionType: 1,
+															to: 1,
+															speed: 1300
+														});
+													}
+													break;
+												case 1:
+													$('.robot').css('left', '33%');
+													if (vm.isRun) {
+														var data = {
+															machineId: 'B1',
+															type: 'control>plc',
+															actionType: 1,
+															speed: 1300
+														};
+														if (!vm.direction) data.to = 2;
+														else data.to = 0;
+														iosocket.emit('action', data);
+													}
+													break;
+												case 2:
+													$('.robot').css('left', '66%');
+													vm.direction = true;
+													if (vm.isRun) {
+														iosocket.emit('action', {
+															machineId: 'B1',
+															type: 'control>plc',
+															actionType: 1,
+															to: 1,
+															speed: 1300
+														});
+													}
+													break;
+												case 3:
+													$('.robot').css('left', '99%');
+													break;
+												default:
+													break;
+											}
+											vm.position = data.position;
+										}
+									});
+									var t, h;
+									iosocket.on('readSensor', function (data) {
+										$('.humidity').html(data.HUMI);
+										$('.temperature').html(data.TEMP);
+										$('.pm25').html(data.PM25);
+										$('.pm10').html(data.PM10);
+										$('.hcho').html(data.HCHO);
+										$('.co2').html(data.CO2);
+										t = data.TEMP.replace(/[^\d.]/g, '');
+										$('.item-circle').circleProgress({
+											value: t / 40
+										});
+										// h = data.HUMI.replace(/[^\d.]/g, '');
+										// $('.item-circle-humidity').circleProgress({
+										// 	value: h / 100
+										// });
+									});
+								});
+								iosocket.emit('air');
+								setInterval(function () {
+									iosocket.emit('air');
+								}, 5000)
 							}
-						});
-						// iosocket.on('broadcast', function (data) {
-						// 	vm.operation.addMsg(data);
-						// });
-						// iosocket.on('pulse', function (data) {
-						// 	vm.operation.addMsg('脉搏:' + JSON.stringify(data));
-						// });
-						var t;
-						iosocket.on('readSensor', function (data) {
-							// vm.operation.addMsg('空气指数:' + JSON.stringify(data));
-							console.log(data);
-							$('.humidity').html(data.HUMI);
-							$('.temperature').html(data.TEMP);
-							$('.pm25').html(data.PM25);
-							$('.pm10').html(data.PM10);
-							$('.hcho').html(data.HCHO);
-							$('.co2').html(data.CO2);
-							t = data.TEMP.replace(/[^\d.]/g,'');
-							$('.item-circle').circleProgress({ value: t/40});
-						});
-
-					});
-					iosocket.emit('air');
-					setInterval(function () {
-						iosocket.emit('air');
-					}, 5000)
-
-					
+						},
+						stopAnimation: function () {
+							$('.bg-1').css('animation', 'initial');
+							$('.bg-2').css('animation', 'initial');
+						},
+						runAnimation: function () {
+							$('.bg-1').css('animation', 'circle 5s infinite linear alternate');
+							$('.bg-2').css('animation', 'circle 5s infinite linear alternate');
+						},
+						init: function () {
+							this.io.init();
+							setInterval(function () {
+								if (new Date().getTime() - vm.timestamp > 5000) {
+									vm.stopAnimation();
+								} else {
+									vm.runAnimation();
+								}
+							}, 5000)
+						}
+					}
+					vm.init();
 				});
 			</script>
 		</div>
@@ -132,7 +219,7 @@
 						<p>pm2.5细颗粒物</p>
 					</li>
 					<li>
-						<span >
+						<span>
 							<b>0</b>
 							<sup>ug/m3</sup>
 						</span>
@@ -143,7 +230,7 @@
 							<b>0</b>
 							<sup>ug/m3</sup>
 						</span>
-						<p>co一氧化碳浓度</p>
+						<p>CO一氧化碳浓度</p>
 					</li>
 					<li>
 						<span>
@@ -160,11 +247,11 @@
 						<p>pm10可吸入颗粒物</p>
 					</li>
 					<li>
-						<span class="co2">
+						<span class="CO2">
 							<b>0</b>
 							<sup>ug/m3</sup>
 						</span>
-						<p>co2二氧化碳浓度</p>
+						<p>CO2二氧化碳浓度</p>
 					</li>
 					<li>
 						<span class="hcho">
@@ -184,11 +271,11 @@
 					</div>
 					<div class="item-hd">
 						<p class="txt-1">pm2.5</p>
-						<p class="txt-2">o2</p>
-						<p class="txt-3">co</p>
-						<p class="txt-4">h2s</p>
+						<p class="txt-2">O2</p>
+						<p class="txt-3">CO</p>
+						<p class="txt-4">H2S</p>
 						<p class="txt-5">pm10</p>
-						<p class="txt-6">ch4</p>
+						<p class="txt-6">CH4</p>
 						<p class="txt-7">CO2</p>
 					</div>
 				</div>
@@ -209,6 +296,7 @@
 		</div>
 		<!-- index-middle end -->
 		<div class="index-right">
+			<button type="button" onclick="vm.run();">开始/暂停</button>
 			<div class="index-progress">
 				<div class="item-hd">
 					<span class="robot" style="left: 33.3333%;"></span>
