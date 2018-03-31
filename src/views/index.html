@@ -220,12 +220,12 @@
 								}
 							});
 							setInterval(function () {
-								if (new Date().getTime() - vm.timestamp > 3000) {
+								if (new Date().getTime() - vm.timestamp > 2000) {
 									vm.stopAnimation();
 								} else {
 									vm.runAnimation();
 								}
-							}, 3000)
+							}, 1000)
 						}
 					}
 					vm.init();
