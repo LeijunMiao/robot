@@ -199,14 +199,19 @@
 							$('.robot-button').on('click', function () {
 								vm.isRun = !vm.isRun;
 								if (vm.isRun) {
-									$('.robot-button').css('background-image', 'url(../images/stop.png)');
-									iosocket.emit('action', {
+									var data = {
 										machineId: 'B1',
 										type: 'control>plc',
 										actionType: 1,
-										to: 1,
 										speed: 1300
-									});
+									}
+									if(vm.position != 1) {
+										data.to = 1;
+									}
+									else data.to = 0;
+
+									$('.robot-button').css('background-image', 'url(../images/stop.png)');
+									iosocket.emit('action', data);
 									
 								} else {
 									$('.robot-button').css('background-image', 'url(../images/run.png)');
