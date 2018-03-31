@@ -101,6 +101,7 @@
 									});
 									iosocket.on('pulse', function (data) {
 										if(data.status == 1)vm.timestamp = new Date().getTime();
+										console.log(vm.position,data.position,data.path.indexOf('>'));
 										if (vm.position != data.position && data.path.indexOf('>') == -1) {
 											switch (data.position) {
 												case 0:
@@ -151,7 +152,7 @@
 													break;
 											}
 											vm.position = data.position;
-										} else {
+										} else if(data.path.indexOf('>') == -1) {
 											vm.position = data.position;
 										}
 									});
