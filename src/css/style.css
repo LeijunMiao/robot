@@ -11,13 +11,13 @@ body{ min-width: 1440px; background-image: url(../images/bg_index-wrap.jpg); bac
 .index-left .item-hd sup{ font-size: 11px; }
 .index-left .item-circle{     margin-top: 50px; margin-left: 15px; width: 102px; height: 102px; padding: 15px 7px 7px 43px; background-image: url(../images/index-circle-bg.png); background-repeat: no-repeat; text-align: center; font-size: 12px; color: #2885b4; position: relative; }
 .index-left .item-circle canvas{ display: block; width: 102px; height: 102px; position: absolute; top: 14px; left: 43px; }
-.index-left .item-circle span{ display: block; margin-top: 27px; line-height: 1; font-size: 30px; color: #17e5e5; }
+.index-left .item-circle span{ display: block; margin-top: 35px; line-height: 1; font-size: 30px; color: #17e5e5; }
 .index-left .item-circle sup{ font-size: 14px; }
 .index-left .item-circle-humidity{    margin-left: 15px; width: 102px; height: 102px; padding: 15px 7px 7px 43px; background-image: url(../images/index-circle-bg.png); background-repeat: no-repeat; text-align: center; font-size: 12px; color: #2885b4; position: relative; }
 .index-left .item-circle-humidity canvas{ display: block; width: 102px; height: 102px; position: absolute; top: 14px; left: 43px; }
 .index-left .item-humidity span{ display: block; margin-top: 27px; line-height: 1; font-size: 30px; color: #17e5e5; text-align: center}
 .index-left .item-humidity p{
-	color: #17e5e5; text-align: center
+	color: #2885b4;; text-align: center
 }
 .index-left .item-circle-humidity sup{ font-size: 14px; }
 .index-left .left-bg1{ background-image: url(../images/index-left-bg1.png); }
@@ -130,5 +130,15 @@ animation: circle 3s infinite linear alternate; */
 .index-menu .on:before{ content: ""; display: block; width: 2px; height: 2px; -webkit-border-radius: 50%; border-radius: 50%; position: absolute; top: 26px; left: 26px; z-index: 1; -webkit-box-shadow: 0 0 40px 40px rgba(23,229,229,0.2); -moz-box-shadow: 0 0 40px 40px rgba(23,229,229,0.2); -o-box-shadow: 0 0 40px 40px rgba(23,229,229,0.2); box-shadow: 0 0 40px 40px rgba(23,229,229,0.2); }
 .index-menu .on a{ color: #17e5e5; }
 .index-menu .on a:before{ background-color: rgba(190,255,255,0.1); background-position-y: -45px; border-color: transparent; -webkit-box-shadow: 0 0 0 1px #17e5e5; -moz-box-shadow: 0 0 0 1px #17e5e5; -o-box-shadow: 0 0 0 1px #17e5e5; box-shadow: 0 0 0 1px #17e5e5; }
+.robot-button{
+	background-image: url(../images/run.png);
+    background-repeat: no-repeat;
+    height: 30px;
+    width: 30px;
+    background-size: contain;
+    display: block;
+	/* float: left; */
+	cursor: pointer;
+}
 
 

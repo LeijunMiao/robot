@@ -88,10 +88,6 @@
 						id: 'A10',
 						isRun: false,
 						timestamp: 0,
-						interval,
-						run: function () {
-							this.isRun = !this.isRun;
-						},
 						io: {
 							init: function () {
 								iosocket.on("connect", function () {
@@ -165,7 +161,8 @@
 										$('.pm10').html(data.PM10);
 										$('.hcho').html(data.HCHO);
 										$('.co2').html(data.CO2);
-										t = data.TEMP.replace(/[^\d.]/g, '');
+										t = parseInt(data.TEMP.replace(/[^\d.]/g, ''));
+										if(t<0) t = 0;
 										$('.item-circle').circleProgress({
 											value: t / 40
 										});
@@ -191,6 +188,14 @@
 						},
 						init: function () {
 							this.io.init();
+							$('.robot-button').on('click', function () {
+								vm.isRun = !vm.isRun;
+								if (vm.isRun) {
+									$('.robot-button').css('background-image', 'url(../images/stop.png)');
+								} else {
+									$('.robot-button').css('background-image', 'url(../images/run.png)');
+								}
+							});
 							setInterval(function () {
 								if (new Date().getTime() - vm.timestamp > 5000) {
 									vm.stopAnimation();
@@ -213,50 +218,50 @@
 				<ul class="clearfix item-bd">
 					<li>
 						<span class="pm25">
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>pm2.5细颗粒物</p>
 					</li>
 					<li>
 						<span>
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>O2氧气浓度</p>
 					</li>
 					<li>
 						<span>
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>CO一氧化碳浓度</p>
 					</li>
 					<li>
 						<span>
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>H2S 硫化氢浓度</p>
 					</li>
 					<li>
 						<span class="pm10">
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
-						<p>pm10可吸入颗粒物</p>
+						<p>pm10可吸入颗粒</p>
 					</li>
 					<li>
 						<span class="CO2">
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>CO2二氧化碳浓度</p>
 					</li>
 					<li>
 						<span class="hcho">
-							<b>0</b>
-							<sup>ug/m3</sup>
+							<c>0 ug/m3</c>
+							<!-- <sup>ug/m3</sup> -->
 						</span>
 						<p>CH4甲烷浓度</p>
 					</li>
@@ -296,7 +301,7 @@
 		</div>
 		<!-- index-middle end -->
 		<div class="index-right">
-			<button type="button" onclick="vm.run();">开始/暂停</button>
+			<div class="robot-button"></div>
 			<div class="index-progress">
 				<div class="item-hd">
 					<span class="robot" style="left: 33.3333%;"></span>
