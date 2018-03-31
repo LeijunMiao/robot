@@ -198,6 +198,13 @@
 								vm.isRun = !vm.isRun;
 								if (vm.isRun) {
 									$('.robot-button').css('background-image', 'url(../images/stop.png)');
+									iosocket.emit('action', {
+										machineId: 'B1',
+										type: 'control>plc',
+										actionType: 1,
+										to: 1,
+										speed: 1300
+									});
 									
 								} else {
 									$('.robot-button').css('background-image', 'url(../images/run.png)');
